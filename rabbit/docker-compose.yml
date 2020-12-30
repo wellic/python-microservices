@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: ${CONTAINER_NAME}
+    hostname: ${CONTAINER_NAME}
+    volumes:
+      - ../.docker_data/rabbitmq/data/:/var/lib/rabbitmq/
+#      - ../.docker_data/rabbitmq/etc/:/etc/rabbitmq/
+#      - ../.docker_data/rabbitmq/logs/:/var/log/rabbitmq/
+#      - ../.docker_data/enabled_plugins:/etc/rabbitmq/enabled_plugins
+#      #- "./rabbitmq.config:/etc/rabbitmq/rabbitmq.config:ro"
+    environment:
+      - RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE}
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - rabbit
+
+networks:
+  rabbit:
+    name: ${CONTAINER_NAME}
+    driver: bridge

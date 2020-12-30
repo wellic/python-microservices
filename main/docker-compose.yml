@@ -1,34 +1,55 @@
 version: '3.8'
 services:
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: 'python main.py'
-    ports:
-      - 8001:5000
-    volumes:
-      - .:/app
-    depends_on:
-      - db
+    backend:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: 'python main.py'
+        ports:
+            - 8881:5000
+        volumes:
+            - .:/app
+        depends_on:
+            - db
+        user: "1000:1000"
+        networks:
+            - backend
+            - rabbitmq
+            - admin_backend
 
-  queue:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: 'python consumer.py'
-    depends_on:
-      - db
+    db:
+        hostname: main-db
+        image: mysql:5.7
+        #    restart: always
+        environment:
+            MYSQL_DATABASE: main
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_PASSWORD: root
+#            MYSQL_USER: admin
+        volumes:
+            - ../.docker_data/db/main:/var/lib/mysql
+        ports:
+            - 33067:3306
+        networks:
+            - backend
 
-  db:
-    image: mysql:5.7.22
-    restart: always
-    environment:
-      MYSQL_DATABASE: main
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
-      MYSQL_ROOT_PASSWORD: root
-    volumes:
-      - .dbdata:/var/lib/mysql
-    ports:
-      - 33067:3306
+    queue:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: 'python consumer.py'
+        depends_on:
+            - db
+        volumes:
+            - .:/app
+        networks:
+            - backend
+            - rabbitmq
+
+networks:
+    backend:
+        driver: bridge
+    rabbitmq:
+        external: true
+    admin_backend:
+        external: true

@@ -1,12 +1,11 @@
 import pika, json
 
-from settings import RABBITMQ_URL
-
-params = pika.URLParameters(RABBITMQ_URL)
+params = pika.URLParameters('your_rabbitmq_url')
 
 connection = pika.BlockingConnection(params)
 
 channel = connection.channel()
+
 
 def publish(method, body):
     properties = pika.BasicProperties(method)

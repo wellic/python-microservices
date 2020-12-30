@@ -1,19 +1,17 @@
-import random
-
-from rest_framework import status, viewsets
+from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Product, User
 from .producer import publish
 from .serializers import ProductSerializer
+import random
 
 
 class ProductViewSet(viewsets.ViewSet):
-
     def list(self, request):
-        product = Product.objects.all()
-        serializer = ProductSerializer(product, many=True)
+        products = Product.objects.all()
+        serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
 
     def create(self, request):
@@ -37,9 +35,8 @@ class ProductViewSet(viewsets.ViewSet):
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
     def destroy(self, request, pk=None):
-        product = Product.objects.filter(id=pk)
-        if product:
-            product.delete()
+        product = Product.objects.get(id=pk)
+        product.delete()
         publish('product_deleted', pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -47,9 +44,7 @@ class ProductViewSet(viewsets.ViewSet):
 class UserAPIView(APIView):
     def get(self, _):
         users = User.objects.all()
-        if users:
-            user = random.choice(users)
-            return Response({
-                'id': user.id
-            })
-        return Response({})
+        user = random.choice(users)
+        return Response({
+            'id': user.id
+        })
